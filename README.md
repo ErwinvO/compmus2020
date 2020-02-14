@@ -1,14 +1,19 @@
 # compmus2020
 repository for computational musicology @UvA
+Erwin van Oostenbrugge
+11361301
 
-I will be looking at the differences between Mark Knopfler's writing and producing for Dire Straits and his solo projects. Although Mark Knopfler has been at the helm for both artists as songwriter and main producer, Dire Straits has been more succesful than his solo music, leading me to believe there are some key differences between the music of Dire Straits and the music of Mark Knopfler.
+##Introduction 
+I will be looking at the differences between Mark Knopfler's writing and producing for Dire Straits and his solo projects. Although Mark Knopfler has been at the helm for both artists as songwriter and main producer, Dire Straits has been much more successful than his solo music, leading me to believe there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these three is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
 
-Some interesting features for both Dire Straits and Mark Knopfler is that for a lot of the variables, the median is so low that the SD would at its lowest be sub-zero. For instance, for music that is largely based around solos for both acoustic and electric guitar, it is at least worth noting that this is the case for instrumentalness (M = 0,31 and 0,23, SD = 0,32 and 0,26). 
+###Loudness
+One of the most notable things I stumbled upon last week was the fact that Mark Knopfler's solo music was mastered less loud.(1) This was interesting, because technological advancements made it possible to produce louder masters than the masters of Dire Straits' tracks. However, looking at the data and the relationships between loudness and other musical parameters has lead me to conclude that acoustic music tends to have softer mastering. This is to be expected, since a too heavily compressed sound on acoustic guitar tends to sound unnatural. In turn, this means that Mark Knopfler's reliance on the acoustic guitar for his solo project meant that obviously the median for loudness would be lower.(2) However, taking acousticness out of the consideration by dividing loudness by acousticness, we can see that Mark Knopfler's music is in fact considerably louder for the amount of acoustic sounds he uses.(3)
+![1](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness.png)
+![2](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness compared to Acousticness.png)
+![3](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness in relation to acousticness.png)
 
-Despite technological advancements, Dire Straits' music is significantly louder (M = -10 and M = -13, SD = 2,8 and 4,5). This might have something to do with how "natural" the mastering is, as louder masters tend to be more "squashed" by compression.
+###Other musical Differences
+Knowing that much of the statistics discovered last week might potentially be tainted by the fact that Mark Knopfler has released considerably more acoustic tracks in his solo career, it is good to also revisit the other significant differences discovered last week. As we've seen, acousticness and loudness are directly related. The same can be said for loudness and energy (4) and acousticness and energy (5), which all suggest that in Spotify's algorithm for coming up with these numbers, these parameters are influencing each other. The only way to determine which difference is actually significant is by taking the fact that Mark Knopfler has made more acoustic music out of the equation.
+![4](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness-energy.png)
+![5](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\energy-acousticness.png)
 
-Although Mark Knopfler "talk-sings" (or recites), speechiness is quite low for both Dire Straits (M = 0,04) and his solo work (M = 0,03).
-
-Most significantly, Mark Knopfler's solo music is lower-energy (M = 0,38, SD = 0,21) and more acoustic (M = 0,63 and SD = 0,26) than Dire straits (respectively M = 0,62 and SD = 0,21, and M = 0,29 and SD = 0,25). Remarkably, both discographies seem to be equally dancable, despite the differences in energy levels (M = 0,59 and 0,53 with SD = around 1,5).
-
-These numbers are of course not set in stone, I might filter the results to only show studio-albums and omit soundtracks. Nevertheless, the results so far lead me to conclude that there are in fact significant differences between the two discographies.
