@@ -8,17 +8,17 @@ I will be looking at the differences between Mark Knopfler's writing and produci
 
 ###Loudness
 One of the most notable things I stumbled upon last week was the fact that Mark Knopfler's solo music was mastered less loud.(1) This was interesting, because technological advancements made it possible to produce louder masters than the masters of Dire Straits' tracks. However, looking at the data and the relationships between loudness and other musical parameters has lead me to conclude that acoustic music tends to have softer mastering. This is to be expected, since a too heavily compressed sound on acoustic guitar tends to sound unnatural. In turn, this means that Mark Knopfler's reliance on the acoustic guitar for his solo project meant that obviously the median for loudness would be lower.(2) However, taking acousticness out of the consideration by dividing loudness by acousticness, we can see that Mark Knopfler's music is in fact considerably louder for the amount of acoustic sounds he uses.(3)
-1
-2
-3
+
 ![Loudness](Loudness.png)
-![Loudness compared to Acousticness](Loudness compared to Acousticness.png)
-![Loudness in relation to acousticness](Loudness in relation to acousticness.png)
+1
+![Loudness compared to Acousticness](LoudnesscomparedtoAcousticness.png)
+2
+![Loudness in relation to acousticness](Loudnessinrelationtoacousticness.png)
+3
 
 ###Other musical Differences
 Knowing that much of the statistics discovered last week might potentially be tainted by the fact that Mark Knopfler has released considerably more acoustic tracks in his solo career, it is good to also revisit the other significant differences discovered last week. As we've seen, acousticness and loudness are directly related. The same can be said for loudness and energy (4) and acousticness and energy (5), which all suggest that in Spotify's algorithm for coming up with these numbers, these parameters are influencing each other. The only way to determine which difference is actually significant is by taking the fact that Mark Knopfler has made more acoustic music out of the equation.
-4
-5
 ![Loudness-energy](Loudness-energy.png)
+4
 ![energy-acousticness](energy-acousticness.png)
-
+5
