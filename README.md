@@ -22,3 +22,10 @@ Knowing that much of the statistics discovered last week might potentially be ta
 4
 ![energy-acousticness](energy-acousticness.png)
 5
+
+When corrected according to the level of acousticness however, we can still see that the songs by Dire Straits contain significantly more energy than the songs by Mark Knopfler's solo project.(6) Hence we can safely conclude that this difference in energy might have contributed to the difference in succes between the two artists.
+![6](trenergy.png)
+6
+
+### General conclusions
+Thusfar we can most of all safely conclude that both the spotify algorithm and the difference in acousticness between the two artists make it fairly hard to reach any further conclusions about differences between the two artists. Perhaps randomly picking samples according to normal distributions of other parameters could help with this. I will look further into that in the coming weeks.
