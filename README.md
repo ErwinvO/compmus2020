@@ -11,14 +11,14 @@ One of the most notable things I stumbled upon last week was the fact that Mark 
 1
 2
 3
-![1](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness.png)
-![2](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness compared to Acousticness.png)
-![3](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness in relation to acousticness.png)
+![Loudness](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness.png)
+![Loudness compared to Acousticness](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness compared to Acousticness.png)
+![Loudness in relation to acousticness](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness in relation to acousticness.png)
 
 ###Other musical Differences
 Knowing that much of the statistics discovered last week might potentially be tainted by the fact that Mark Knopfler has released considerably more acoustic tracks in his solo career, it is good to also revisit the other significant differences discovered last week. As we've seen, acousticness and loudness are directly related. The same can be said for loudness and energy (4) and acousticness and energy (5), which all suggest that in Spotify's algorithm for coming up with these numbers, these parameters are influencing each other. The only way to determine which difference is actually significant is by taking the fact that Mark Knopfler has made more acoustic music out of the equation.
 4
 5
-![4](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness-energy.png)
-![5](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\energy-acousticness.png)
+![Loudness-energy](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\Loudness-energy.png)
+![energy-acousticness](F:\Muziekwetenschappen\Jaar 3\3 computational musicology\compmus2020\energy-acousticness.png)
 
