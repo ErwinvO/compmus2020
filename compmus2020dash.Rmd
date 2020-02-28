@@ -1,0 +1,50 @@
+---
+title: "Compmus2020"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    theme: "journal"
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(spotifyr)
+library(tidyverse)
+library(plotly)
+source('F:/Muziekwetenschappen/Jaar 3/3 computational musicology/compmus2020/Spotify.R')
+```
+
+
+### Introduction: Mark Knopfler makes more acoustic music {data-commentary-width=300}
+
+
+
+```{r}
+knopfler <- get_artist_audio_features(artist = "Mark Knopfler")
+direstraits <- get_artist_audio_features(artist = "Dire Straits")
+combined <- 
+  knopfler %>% bind_rows(direstraits)
+
+plot1 <-
+  ggplot(combined, aes(x = acousticness, y = loudness, color = artist_name, label = track_name)) +
+  geom_point()+
+  geom_smooth(aes(color = artist_name))+
+  theme_classic() +
+  labs(color = "Artiest")
+
+ggplotly(plot1)
+
+```
+
+
+***
+
+Although Mark Knopfler has been at the helm for both Dire Straits and his own solo music as songwriter and main producer, Dire Straits has been much more successful than his own music. This leads me to believe that there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
+
+
+At first glance the primary difference between the two artists seems obvious: Mark Knopfler has produced more acoustic music. This is however where problems arise. Looking at the mean loudness for both artists, we would conclude that Dire Straits produced significantly louder music. This is not what would be expected, since louder mastering has become the standard and the means to do so have been developed over the years. This difference in loudness is not a stylistic feature of the music, but rather a consequence of the acousticness of the music, as can be seen in this plot. Notice how Mark Knopfler's music *in relation to its acousticness* is louder than the music of Dire Straits. 
+ 
+
+### Using linear regression models show other differences between Dire Straits and Mark Knopfler
+
+
