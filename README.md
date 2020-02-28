@@ -1,31 +1,48 @@
-# compmus2020
-repository for computational musicology @UvA
-Erwin van Oostenbrugge
-11361301
+---
+title: "Compmus2020"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    theme: "journal"
+---
 
-## Introduction 
-I will be looking at the differences between Mark Knopfler's writing and producing for Dire Straits and his solo projects. Although Mark Knopfler has been at the helm for both artists as songwriter and main producer, Dire Straits has been much more successful than his solo music, leading me to believe there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these three is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(spotifyr)
+library(tidyverse)
+library(plotly)
+source('F:/Muziekwetenschappen/Jaar 3/3 computational musicology/compmus2020/Spotify.R')
+```
 
-### Loudness
-One of the most notable things I stumbled upon last week was the fact that Mark Knopfler's solo music was mastered less loud.(1) This was interesting, because technological advancements made it possible to produce louder masters than the masters of Dire Straits' tracks. However, looking at the data and the relationships between loudness and other musical parameters has lead me to conclude that acoustic music tends to have softer mastering. This is to be expected, since a too heavily compressed sound on acoustic guitar tends to sound unnatural. In turn, this means that Mark Knopfler's reliance on the acoustic guitar for his solo project meant that obviously the median for loudness would be lower.(2) However, taking acousticness out of the consideration by dividing loudness by acousticness, we can see that Mark Knopfler's music is in fact considerably louder for the amount of acoustic sounds he uses.(3)
 
-![Loudness](Loudness.png)
-1
-![Loudness compared to Acousticness](LoudnesscomparedtoAcousticness.png)
-2
-![Loudness in relation to acousticness](Loudnessinrelationtoacousticness.png)
-3
+### Introduction: Mark Knopfler makes more acoustic music {data-commentary-width=300}
 
-### Other musical Differences
-Knowing that much of the statistics discovered last week might potentially be tainted by the fact that Mark Knopfler has released considerably more acoustic tracks in his solo career, it is good to also revisit the other significant differences discovered last week. As we've seen, acousticness and loudness are directly related. The same can be said for loudness and energy (4) and acousticness and energy (5), which all suggest that in Spotify's algorithm for coming up with these numbers, these parameters are influencing each other. The only way to determine which difference is actually significant is by taking the fact that Mark Knopfler has made more acoustic music out of the equation.
-![Loudness-energy](Loudness-energy.png)
-4
-![energy-acousticness](energy-acousticness.png)
-5
 
-When corrected according to the level of acousticness however, we can still see that the songs by Dire Straits contain significantly more energy than the songs by Mark Knopfler's solo project.(6) Hence we can safely conclude that this difference in energy might have contributed to the difference in succes between the two artists.
-![6](trenergy.png)
-6
 
-### General conclusions
-Thusfar we can most of all safely conclude that both the spotify algorithm and the difference in acousticness between the two artists make it fairly hard to reach any further conclusions about differences between the two artists. Perhaps randomly picking samples according to normal distributions of other parameters could help with this. I will look further into that in the coming weeks.
+```{r}
+knopfler <- get_artist_audio_features(artist = "Mark Knopfler")
+direstraits <- get_artist_audio_features(artist = "Dire Straits")
+combined <- 
+  knopfler %>% bind_rows(direstraits)
+
+plot1 <-
+  ggplot(combined, aes(x = acousticness, y = loudness, color = artist_name, label = track_name)) +
+  geom_point()+
+  geom_smooth(aes(color = artist_name))+
+  theme_classic() +
+  labs(color = "Artiest")
+
+ggplotly(plot1)
+
+```
+
+
+***
+
+Although Mark Knopfler has been at the helm for both Dire Straits and his own solo music as songwriter and main producer, Dire Straits has been much more successful than his own music. This leads me to believe that there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
+
+
+At first glance the primary difference between the two artists seems obvious: Mark Knopfler has produced more acoustic music. This is however where problems arise. Looking at the mean loudness for both artists, we would conclude that Dire Straits produced significantly louder music. This is not what would be expected, since louder mastering has become the standard and the means to do so have been developed over the years. This difference in loudness is not a stylistic feature of the music, but rather a consequence of the acousticness of the music, as can be seen in this plot. Notice how Mark Knopfler's music *in relation to its acousticness* is louder than the music of Dire Straits. 
+ 
+
+### Using linear regression models show other differences between Dire Straits and Mark Knopfler
