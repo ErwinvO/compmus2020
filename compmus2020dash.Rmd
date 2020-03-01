@@ -14,6 +14,7 @@ library(tidyverse)
 library(plotly)
 source('Spotify.R')
 library(compmus)
+library(rmarkdown)
 ```
 
 ### Something about structure
