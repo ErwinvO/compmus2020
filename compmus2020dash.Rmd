@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     storyboard: true
     theme: "journal"
+    keep_md: true
 ---
 
 ```{r setup, include=FALSE}
