@@ -11,11 +11,21 @@ library(flexdashboard)
 library(spotifyr)
 library(tidyverse)
 library(plotly)
-source('F:/Muziekwetenschappen/Jaar 3/3 computational musicology/compmus2020/Spotify.R')
+source('Spotify.R')
+library(compmus)
 ```
 
+### Something about structure
 
-### Introduction: Mark Knopfler makes more acoustic music {data-commentary-width=300}
+
+
+### Introduction
+
+Although Mark Knopfler has been at the helm for both Dire Straits and his own solo music as songwriter and main producer, Dire Straits has been much more successful than his own music. This leads me to believe that there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
+
+The corpus I'm using is, quite obviously, the entire discographies by both artists, aquired by the get_artist_audio_features option in spotifyr. Other differences between the two artists are discussed via similarity- and self-similarity-matrices. 
+
+### Mark Knopfler makes louder, but more acoustic music {data-commentary-width=350}
 
 
 
@@ -30,7 +40,8 @@ plot1 <-
   geom_point()+
   geom_smooth(aes(color = artist_name))+
   theme_classic() +
-  labs(color = "Artiest")
+  labs(color = "Artist") +
+  ggtitle("Loudness in Relation to Acousticness")
 
 ggplotly(plot1)
 
@@ -39,12 +50,49 @@ ggplotly(plot1)
 
 ***
 
-Although Mark Knopfler has been at the helm for both Dire Straits and his own solo music as songwriter and main producer, Dire Straits has been much more successful than his own music. This leads me to believe that there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
-
-
 At first glance the primary difference between the two artists seems obvious: Mark Knopfler has produced more acoustic music. This is however where problems arise. Looking at the mean loudness for both artists, we would conclude that Dire Straits produced significantly louder music. This is not what would be expected, since louder mastering has become the standard and the means to do so have been developed over the years. This difference in loudness is not a stylistic feature of the music, but rather a consequence of the acousticness of the music, as can be seen in this plot. Notice how Mark Knopfler's music *in relation to its acousticness* is louder than the music of Dire Straits. 
- 
 
-### Using linear regression models show other differences between Dire Straits and Mark Knopfler
+*A lot of the softer tracks by Mark Knopfler are filmscores, which slightly skew the results shown in this graph. This is why I will not include those tracks when choosing an outlier for a chromagram.*
+
+### "Private Investigations" by Dire Straits is a unusually soft track compared to its acousticness, but nevertheless became a hit song {data-commentary-width=350}
+
+```{r}
+
+investigations <- 
+  get_tidy_audio_analysis('5KVak7r5YKcnkmARc0hy0Q') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+
+investigations %>%
+  mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')) %>% 
+    compmus_gather_chroma %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') + 
+  theme_minimal() +
+  ggtitle("Private Investigations: Pitches Used over Time")
+
+```
+
+***
+
+Notable for the song *Private Investigations*, aside from its low loudness, is the fact that over the course of nearly 7 minutes, a very consistent drone on the note E is present. On certain points (like around the 2:15 mark) this E is the only note present in the song, which is clearly visible in the chromagram. Apart from the drone on E, the clearly distinguishable occurance of almost every other note is very notable. The harmonic development of the song crosses chords like Gdim7, A/C# and B7b9, despite being written in Em. This stands in stark contrast with the most of the other repertoire of both artists and pop music from that time (the 80s) in general. In this sense *Private Investigations* can be seen as a notable outlier in the repertoire of Dire Straits.
+
+### Using linear regression models show other differences between Dire Straits and Mark Knopfler {data-commentary-width=350}
+
+***
+
+*Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut fermentum imperdiet ultricies. Nulla et nulla vel tortor pharetra elementum et sed ex. Nullam eleifend orci convallis commodo gravida. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In porta orci eu aliquam scelerisque. Morbi turpis ipsum, ornare in lectus id, suscipit scelerisque elit. Nullam egestas nibh dolor, quis consectetur purus vulputate lobortis. Morbi sodales augue sed varius pellentesque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam erat lorem, suscipit sagittis pellentesque a, congue a est.*
+
+*Quisque euismod velit id sem ornare semper. Integer gravida efficitur cursus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum fermentum arcu sed nibh pharetra, id bibendum neque varius. Mauris quis augue ut nunc pulvinar vehicula sit amet id leo. Curabitur et ipsum est. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Maecenas ullamcorper eu nulla a vulputate.*
+
+*Mauris vestibulum pretium sem, quis consectetur purus ullamcorper eget. Sed quis ante vitae felis dignissim mattis vulputate quis eros. Cras elit sapien, posuere et ullamcorper vitae, auctor suscipit ligula. Proin imperdiet dapibus tortor, nec ornare dolor sodales.* 
+
+### Conclusions and discussion {data-commentary-width=350}
 
 
