@@ -1,9 +1,10 @@
 ---
 title: "Compmus2020"
+author: "Erwin van Oostenbrugge"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: true
-    theme: "journal"
+    theme: "paper"
     keep_md: true
 ---
 
@@ -23,17 +24,92 @@ library(compmus)
 library(rmarkdown)
 ```
 
-### Something about structure
+### 4. Mark Knopfler makes more timbrally diverse music for his solo project{data-commentary-width=300}
+
+#### Sultans of Swing - Dire Straits
+
+```{r}
+sos <- 
+    get_tidy_audio_analysis('37Tmv4NnfQeb0ZgUC4fOJj') %>% 
+    compmus_align(bars, segments) %>% 
+    select(bars) %>% unnest(bars) %>% 
+    mutate(
+        pitches = 
+            map(segments, 
+                compmus_summarise, pitches, 
+                method = 'rms', norm = 'chebyshev')) %>% 
+    mutate(
+        timbre = 
+            map(segments, 
+                compmus_summarise, timbre, 
+                method = 'rms', norm = 'euclidean'))
+
+sos %>% 
+    compmus_gather_timbre %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = basis, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_fill_viridis_c(option = 'E') +
+    scale_fill_gradientn(limits = c(0,0.8), colors=c("black", "blue", "yellow")) +
+    theme_minimal() + 
+    ylab("MFCC")
+```
+
+#### What it Is - Mark Knopfler
+
+```{r}
+wii <- 
+    get_tidy_audio_analysis('65f8Ca4HbZCMLhpZPTHW4O') %>% 
+    compmus_align(bars, segments) %>% 
+    select(bars) %>% unnest(bars) %>% 
+    mutate(
+        pitches = 
+            map(segments, 
+                compmus_summarise, pitches, 
+                method = 'rms', norm = 'chebyshev')) %>% 
+    mutate(
+        timbre = 
+            map(segments, 
+                compmus_summarise, timbre, 
+                method = 'rms', norm = 'euclidean'))
+
+wii %>% 
+    compmus_gather_timbre %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = basis, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_fill_viridis_c(option = 'E') +
+    scale_fill_gradientn(limits = c(0,0.8), colors=c("black", "blue", "yellow")) +
+    theme_minimal() + 
+    ylab("MFCC")
+```
+
+***
+
+To illustrate the differences and simmilarities between the two artists I've included cepstrograms of the most popular tracks of both artists according to spotify: *What it Is* by Mark Knopfler and *Sultans of Swing* by Dire Straits.
+
+Looking at *Sultans of Swing*, it is interesting that there is a lot of activity in MFCC c02 during guitar solos. More specifically, during the softer parts of the solo segments, there is a lot of activity here. Generally speaking, there is a correlation between loudness (MFCC c01) and MFCC c02. The timbral diversity of *What it Is* is significantly greater than that of *Sultans of Swing*, although much of this diversity comes from the bridge around 160-200 seconds into the song. Perhaps this timbral diversity is one of the reasons for the relative lack of success for Mark Knopfler as a solo artist (compared to his time in Dire Straits).
+
+Looking at MFCC c01, *What it Is* displays more dynamic diversity than *Sultans of Swing*, although it is the louder song overall. This is in line with the trends I've discovered in the previous weeks. 
 
 
-
-### Introduction
+### 1. Introduction
 
 Although Mark Knopfler has been at the helm for both Dire Straits and his own solo music as songwriter and main producer, Dire Straits has been much more successful than his own music. This leads me to believe that there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
 
-The corpus I'm using is, quite obviously, the entire discographies by both artists, aquired by the get_artist_audio_features option in spotifyr. Other differences between the two artists are discussed via similarity- and self-similarity-matrices. 
+The corpus I'm using is, quite obviously, the entire discographies by both artists, aquired by the get_artist_audio_features command from spotifyr.  
 
-### Mark Knopfler makes louder, but more acoustic music {data-commentary-width=350}
+### 2. Mark Knopfler makes louder, but more acoustic music {data-commentary-width=350}
 
 
 
@@ -62,7 +138,7 @@ At first glance the primary difference between the two artists seems obvious: Ma
 
 *A lot of the softer tracks by Mark Knopfler are filmscores, which slightly skew the results shown in this graph. This is why I will not include those tracks when choosing an outlier for a chromagram.*
 
-### "Private Investigations" by Dire Straits is a unusually soft track compared to its acousticness, but nevertheless became a hit song {data-commentary-width=350}
+### 3. "Private Investigations" by Dire Straits is a unusually soft track compared to its acousticness, but nevertheless became a hit song {data-commentary-width=350}
 
 ```{r}
 
@@ -91,7 +167,7 @@ investigations %>%
 
 Notable for the song *Private Investigations*, aside from its low loudness, is the fact that over the course of nearly 7 minutes, a very consistent drone on the note E is present. On certain points (like around the 2:15 mark) this E is the only note present in the song, which is clearly visible in the chromagram. Apart from the drone on E, the clearly distinguishable occurance of almost every other note is very notable. The harmonic development of the song crosses chords like Gdim7, A/C# and B7b9, despite being written in Em. This stands in stark contrast with the most of the other repertoire of both artists and pop music from that time (the 80s) in general. In this sense *Private Investigations* can be seen as a notable outlier in the repertoire of Dire Straits.
 
-### Using linear regression models show other differences between Dire Straits and Mark Knopfler {data-commentary-width=350}
+### 5. Using linear regression models show other differences between Dire Straits and Mark Knopfler {data-commentary-width=350}
 
 ***
 
@@ -101,6 +177,6 @@ Notable for the song *Private Investigations*, aside from its low loudness, is t
 
 *Mauris vestibulum pretium sem, quis consectetur purus ullamcorper eget. Sed quis ante vitae felis dignissim mattis vulputate quis eros. Cras elit sapien, posuere et ullamcorper vitae, auctor suscipit ligula. Proin imperdiet dapibus tortor, nec ornare dolor sodales.* 
 
-### Conclusions and discussion {data-commentary-width=350}
+### 6. Conclusions and discussion {data-commentary-width=350}
 
 
