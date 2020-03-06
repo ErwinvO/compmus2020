@@ -21,14 +21,28 @@ library(tidyverse)
 library(plotly)
 source('Spotify.R')
 library(compmus)
+library(ggpubr)
 library(rmarkdown)
 ```
 
-### 4. Mark Knopfler makes more timbrally diverse music for his solo project{data-commentary-width=300}
+```{r datasets}
 
-#### Sultans of Swing - Dire Straits
+knopfler <- get_artist_audio_features(artist = "Mark Knopfler")
+direstraits <- get_artist_audio_features(artist = "Dire Straits")
+combined <- 
+  knopfler %>% bind_rows(direstraits)
 
-```{r}
+knopfler2 <-
+  get_playlist_audio_features('Mark Knopfler', '7Fx4RkUA16c1sf56GqDLNi') %>% slice(1:115) %>% add_audio_analysis()
+direstraits2 <-
+  get_playlist_audio_features('Dire Straits', '4De4uI5PG0MYqLftPmsQLW') %>% add_audio_analysis()
+combined2 <- knopfler2 %>% mutate(Artist = "Mark Knopfler") %>% bind_rows(direstraits2 %>% mutate(Artist = "Dire Straits"))
+
+investigations <- 
+  get_tidy_audio_analysis('5KVak7r5YKcnkmARc0hy0Q') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+
 sos <- 
     get_tidy_audio_analysis('37Tmv4NnfQeb0ZgUC4fOJj') %>% 
     compmus_align(bars, segments) %>% 
@@ -44,25 +58,6 @@ sos <-
                 compmus_summarise, timbre, 
                 method = 'rms', norm = 'euclidean'))
 
-sos %>% 
-    compmus_gather_timbre %>% 
-    ggplot(
-        aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = basis, 
-            fill = value)) + 
-    geom_tile() +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    scale_fill_viridis_c(option = 'E') +
-    scale_fill_gradientn(limits = c(0,0.8), colors=c("black", "blue", "yellow")) +
-    theme_minimal() + 
-    ylab("MFCC")
-```
-
-#### What it Is - Mark Knopfler
-
-```{r}
 wii <- 
     get_tidy_audio_analysis('65f8Ca4HbZCMLhpZPTHW4O') %>% 
     compmus_align(bars, segments) %>% 
@@ -78,46 +73,55 @@ wii <-
                 compmus_summarise, timbre, 
                 method = 'rms', norm = 'euclidean'))
 
-wii %>% 
+```
+
+### 5. Dire Straits makes more compressed, bass-heavy music.{data-commentary-width=350}
+
+```{r}
+
+timbreplot <-
+combined2 %>%
+  mutate(
+        timbre =
+            map(
+                segments,
+                compmus_summarise,
+                timbre,
+                method = 'mean')) %>%
+    select(playlist_name, timbre, track.name) %>% 
     compmus_gather_timbre %>% 
-    ggplot(
-        aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = basis, 
-            fill = value)) + 
-    geom_tile() +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    scale_fill_viridis_c(option = 'E') +
-    scale_fill_gradientn(limits = c(0,0.8), colors=c("black", "blue", "yellow")) +
-    theme_minimal() + 
-    ylab("MFCC")
+    group_by(playlist_name) %>%
+    ggplot(aes(x = basis, y = value, label = track.name)) +
+    geom_jitter(alpha = 0.1, shape = 1, aes(color = playlist_name)) + 
+    scale_color_manual(values=c("Yellow", "Purple")) +
+    geom_boxplot(outlier.color = "Grey", aes(fill = playlist_name)) + 
+    scale_fill_viridis_d() +
+    theme_minimal() +
+    labs(x = 'Spotify Timbre Coefficients', y = '', fill = 'Artist', color = '')
+
+ggplotly(timbreplot) %>%
+  layout(boxmode = "group")
+
+
 ```
 
 ***
 
-To illustrate the differences and simmilarities between the two artists I've included cepstrograms of the most popular tracks of both artists according to spotify: *What it Is* by Mark Knopfler and *Sultans of Swing* by Dire Straits.
+When looking at the means and standard deviations of timbre, we can clearly see that the difference in the use of MFCC c02 (lower frequencies) we saw between *Sultans of Swing* and *What it is* is typical for the two artists. Apart from that, there seems to be a somewhat less significant difference in the levels for c04 (quickly decaying attack) which went by largely unnoticed in the specific case studies last week. In general, Mark Knopfler seems to employ a bigger spectrum of timbral features than Dire Straits does, although only c05 seems to be consistently (and equally) prominent in the repertoires of both artists, which is the basis function for "scooped" lower-mid sounds in the spotify API. This naturally leads to lower levels for c06, which is a very mid-heavy MFCC with a slow attack.
 
-Looking at *Sultans of Swing*, it is interesting that there is a lot of activity in MFCC c02 during guitar solos. More specifically, during the softer parts of the solo segments, there is a lot of activity here. Generally speaking, there is a correlation between loudness (MFCC c01) and MFCC c02. The timbral diversity of *What it Is* is significantly greater than that of *Sultans of Swing*, although much of this diversity comes from the bridge around 160-200 seconds into the song. Perhaps this timbral diversity is one of the reasons for the relative lack of success for Mark Knopfler as a solo artist (compared to his time in Dire Straits).
+In conclusion, both Mark Knopfler and Dire Straits use a mid-scooped sound, but the sounds in the music by Dire Straits is more compressed, leading to higher mean volumes and slower decay compared to Mark Knopfler, while also being more bass-heavy.
 
-Looking at MFCC c01, *What it Is* displays more dynamic diversity than *Sultans of Swing*, although it is the louder song overall. This is in line with the trends I've discovered in the previous weeks. 
-
-
-### 1. Introduction
+### 1. Introduction: Why is Dire Straits so much more succesful than Mark Knopfler?
 
 Although Mark Knopfler has been at the helm for both Dire Straits and his own solo music as songwriter and main producer, Dire Straits has been much more successful than his own music. This leads me to believe that there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
 
-The corpus I'm using is, quite obviously, the entire discographies by both artists, aquired by the get_artist_audio_features command from spotifyr.  
+The corpus I'm using is, quite obviously, the entire discographies by both artists, aquired by the get_artist_audio_features command from spotifyr. The question I intend to answer is: what are the fundamental differences between Mark Knopfler's music with Dire Straits and as a solo musician? 
 
-### 2. Mark Knopfler makes louder, but more acoustic music {data-commentary-width=350}
+### 2. The Spotify API skewes some data.{data-commentary-width=350}
 
 
 
 ```{r}
-knopfler <- get_artist_audio_features(artist = "Mark Knopfler")
-direstraits <- get_artist_audio_features(artist = "Dire Straits")
-combined <- 
-  knopfler %>% bind_rows(direstraits)
 
 plot1 <-
   ggplot(combined, aes(x = acousticness, y = loudness, color = artist_name, label = track_name)) +
@@ -138,14 +142,9 @@ At first glance the primary difference between the two artists seems obvious: Ma
 
 *A lot of the softer tracks by Mark Knopfler are filmscores, which slightly skew the results shown in this graph. This is why I will not include those tracks when choosing an outlier for a chromagram.*
 
-### 3. "Private Investigations" by Dire Straits is a unusually soft track compared to its acousticness, but nevertheless became a hit song {data-commentary-width=350}
+### 3. "Private Investigations" by Dire Straits is a unusually soft track, but nevertheless became a hit song. Loudness can't be the only factor. {data-commentary-width=350}
 
 ```{r}
-
-investigations <- 
-  get_tidy_audio_analysis('5KVak7r5YKcnkmARc0hy0Q') %>% 
-    select(segments) %>% unnest(segments) %>% 
-    select(start, duration, pitches)
 
 investigations %>%
   mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')) %>% 
@@ -167,15 +166,54 @@ investigations %>%
 
 Notable for the song *Private Investigations*, aside from its low loudness, is the fact that over the course of nearly 7 minutes, a very consistent drone on the note E is present. On certain points (like around the 2:15 mark) this E is the only note present in the song, which is clearly visible in the chromagram. Apart from the drone on E, the clearly distinguishable occurance of almost every other note is very notable. The harmonic development of the song crosses chords like Gdim7, A/C# and B7b9, despite being written in Em. This stands in stark contrast with the most of the other repertoire of both artists and pop music from that time (the 80s) in general. In this sense *Private Investigations* can be seen as a notable outlier in the repertoire of Dire Straits.
 
-### 5. Using linear regression models show other differences between Dire Straits and Mark Knopfler {data-commentary-width=350}
+### 4. Mark Knopfler makes more timbrally diverse music for his solo project.{data-commentary-width=300}
+
+```{r}
+
+
+sos %>% 
+    compmus_gather_timbre %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = basis, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_fill_viridis_c(option = 'E') +
+    scale_fill_gradientn(limits = c(0,0.8), colors=c("black", "blue", "yellow")) +
+    theme_minimal() + 
+    ylab("MFCC") + labs(title = "Sultans of Swing - Dire Straits")
+
+
+wii %>% 
+    compmus_gather_timbre %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = basis, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_fill_viridis_c(option = 'E') +
+    scale_fill_gradientn(limits = c(0,0.8), colors=c("black", "blue", "yellow")) +
+    theme_minimal() + 
+    ylab("MFCC") + labs(title = "What It Is - Mark Knopfler")
+
+ggarrange(sos, wii)
+
+```
 
 ***
 
-*Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut fermentum imperdiet ultricies. Nulla et nulla vel tortor pharetra elementum et sed ex. Nullam eleifend orci convallis commodo gravida. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In porta orci eu aliquam scelerisque. Morbi turpis ipsum, ornare in lectus id, suscipit scelerisque elit. Nullam egestas nibh dolor, quis consectetur purus vulputate lobortis. Morbi sodales augue sed varius pellentesque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam erat lorem, suscipit sagittis pellentesque a, congue a est.*
+To illustrate the differences and simmilarities between the two artists I've included cepstrograms of the most popular tracks of both artists according to spotify: *What it Is* by Mark Knopfler and *Sultans of Swing* by Dire Straits.
 
-*Quisque euismod velit id sem ornare semper. Integer gravida efficitur cursus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum fermentum arcu sed nibh pharetra, id bibendum neque varius. Mauris quis augue ut nunc pulvinar vehicula sit amet id leo. Curabitur et ipsum est. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Maecenas ullamcorper eu nulla a vulputate.*
+Looking at *Sultans of Swing*, it is interesting that there is a lot of activity in MFCC c02 during guitar solos. This is the range for bass frequencies, leading me to believe that a boosted bass is used to grant support to the guitar solo. More specifically, during the softer parts of the solo segments, there is a lot of activity here. Generally speaking, there is a correlation between loudness (MFCC c01) and bass-frequencies, probably meaning that loudness is (partially) measured in the presence of higher frequencies. The timbral diversity of *What it Is* is significantly greater than that of *Sultans of Swing*, although much of this diversity comes from the bridge around 160-200 seconds into the song. Perhaps this timbral diversity is one of the reasons for the relative lack of success for Mark Knopfler as a solo artist (compared to his time in Dire Straits). This would be due to the unpredictable nature of the sound that doesn't translate well to for instance radio broadcasting. 
 
-*Mauris vestibulum pretium sem, quis consectetur purus ullamcorper eget. Sed quis ante vitae felis dignissim mattis vulputate quis eros. Cras elit sapien, posuere et ullamcorper vitae, auctor suscipit ligula. Proin imperdiet dapibus tortor, nec ornare dolor sodales.* 
+Looking at MFCC c01, *What it Is* displays more dynamic diversity than *Sultans of Swing*, although it is the louder song overall. This is in line with the trends I've discovered in the previous weeks. 
+
 
 ### 6. Conclusions and discussion {data-commentary-width=350}
 
