@@ -93,7 +93,7 @@ combined2 %>%
     group_by(playlist_name) %>%
     ggplot(aes(x = basis, y = value, label = track.name)) +
     geom_jitter(alpha = 0.1, shape = 1, aes(color = playlist_name)) + 
-    scale_color_manual(values=c("Yellow", "Purple")) +
+    scale_color_manual(values=c("Purple", "Yellow")) +
     geom_boxplot(outlier.color = "Grey", aes(fill = playlist_name)) + 
     scale_fill_viridis_d() +
     theme_minimal() +
