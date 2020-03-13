@@ -73,43 +73,30 @@ wii <-
                 compmus_summarise, timbre, 
                 method = 'rms', norm = 'euclidean'))
 
+neworleans <- get_tidy_audio_analysis('4TUC13vLPzZCFSKe5JOJD5')
+
 ```
 
-### 5. Dire Straits makes more compressed, bass-heavy music.{data-commentary-width=350}
+### 6. Jeff Porcaro gave Dire Straits a more relaxed, groovy sound{data-commentary-width=350}
 
 ```{r}
 
-timbreplot <-
-combined2 %>%
-  mutate(
-        timbre =
-            map(
-                segments,
-                compmus_summarise,
-                timbre,
-                method = 'mean')) %>%
-    select(playlist_name, timbre, track.name) %>% 
-    compmus_gather_timbre %>% 
-    group_by(playlist_name) %>%
-    ggplot(aes(x = basis, y = value, label = track.name)) +
-    geom_jitter(alpha = 0.1, shape = 1, aes(color = playlist_name)) + 
-    scale_color_manual(values=c("Purple", "Yellow")) +
-    geom_boxplot(outlier.color = "Grey", aes(fill = playlist_name)) + 
-    scale_fill_viridis_d() +
-    theme_minimal() +
-    labs(x = 'Spotify Timbre Coefficients', y = '', fill = 'Artist', color = '')
-
-ggplotly(timbreplot) %>%
-  layout(boxmode = "group")
-
+neworleans %>% 
+    tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>% 
+    ggplot(aes(x = time, y = bpm, fill = power)) + 
+    geom_raster() + 
+    scale_fill_viridis_c(guide = 'none') +
+    labs(x = 'Time (s)', y = 'Tempo (BPM)') +
+    theme_minimal()+
+    ggtitle("Tempo over time for Planet of New Orleans by Dire Straits")
 
 ```
 
 ***
 
-When looking at the means and standard deviations of timbre, we can clearly see that the difference in the use of MFCC c02 (lower frequencies) we saw between *Sultans of Swing* and *What it is* is typical for the two artists. Apart from that, there seems to be a somewhat less significant difference in the levels for c04 (quickly decaying attack) which went by largely unnoticed in the specific case studies last week. In general, Mark Knopfler seems to employ a bigger spectrum of timbral features than Dire Straits does, although only c05 seems to be consistently (and equally) prominent in the repertoires of both artists, which is the basis function for "scooped" lower-mid sounds in the spotify API. This naturally leads to lower levels for c06, which is a very mid-heavy MFCC with a slow attack.
+One of the last projects drummer Jeff Porcaro (Toto, Steely Dan, Michael Jackson and many others) ever did was the album *On Every Street*, coincidentally also the last album by Dire Straits. The drumming style of Jeff Porcaro can be discribed as very laid back and large-sounding, which can largely be contributed to the fact that he tended to play the backbeat (counts 2 and 4) relatively late compared to the "grid". The result of this can be seen in this graph of *Planet of New Orleans*. After a rubato introduction, the groove sets in and the tempo changes in "waves", possibly due to the late timing of the backbeats especially after 330 seconds. 
 
-In conclusion, both Mark Knopfler and Dire Straits use a mid-scooped sound, but the sounds in the music by Dire Straits is more compressed, leading to higher mean volumes and slower decay compared to Mark Knopfler, while also being more bass-heavy.
+In this respect, the album *On Every Street* is an outlier for both Dire Straits and Mark Knopfler. The drummers Mark Knopfler has worked with ever since tend to be more "on the grid", resulting in flatter tempograms. 
 
 ### 1. Introduction: Why is Dire Straits so much more succesful than Mark Knopfler?
 
@@ -123,7 +110,7 @@ The corpus I'm using is, quite obviously, the entire discographies by both artis
 
 ```{r}
 
-plot1 <-
+loudnessak <-
   ggplot(combined, aes(x = acousticness, y = loudness, color = artist_name, label = track_name)) +
   geom_point()+
   geom_smooth(aes(color = artist_name))+
@@ -131,7 +118,7 @@ plot1 <-
   labs(color = "Artist") +
   ggtitle("Loudness in Relation to Acousticness")
 
-ggplotly(plot1)
+ggplotly(loudnessak)
 
 ```
 
@@ -214,7 +201,44 @@ Looking at *Sultans of Swing*, it is interesting that there is a lot of activity
 
 Looking at MFCC c01, *What it Is* displays more dynamic diversity than *Sultans of Swing*, although it is the louder song overall. This is in line with the trends I've discovered in the previous weeks. 
 
+### 5. Dire Straits makes more compressed, bass-heavy music.{data-commentary-width=350}
 
-### 6. Conclusions and discussion {data-commentary-width=350}
+```{r}
+
+timbreplot <-
+combined2 %>%
+  mutate(
+        timbre =
+            map(
+                segments,
+                compmus_summarise,
+                timbre,
+                method = 'mean')) %>%
+    select(playlist_name, timbre, track.name) %>% 
+    compmus_gather_timbre %>% 
+    group_by(playlist_name) %>%
+    ggplot(aes(x = basis, y = value, label = track.name)) +
+    geom_jitter(alpha = 0.1, shape = 1, aes(color = playlist_name)) + 
+    scale_color_manual(values=c("Purple", "Yellow")) +
+    geom_boxplot(outlier.color = "Grey", aes(fill = playlist_name)) + 
+    scale_fill_viridis_d() +
+    theme_minimal() +
+    labs(x = 'Spotify Timbre Coefficients', y = '', fill = 'Artist', color = '') +
+    ggtitle("Average timbre features for Mark Knopfler and Dire Straits")
+
+ggplotly(timbreplot) %>%
+  layout(boxmode = "group")
+
+
+```
+
+***
+
+When looking at the means and standard deviations of timbre, we can clearly see that the difference in the use of MFCC c02 (lower frequencies) we saw between *Sultans of Swing* and *What it is* is typical for the two artists. Apart from that, there seems to be a somewhat less significant difference in the levels for c04 (quickly decaying attack) which went by largely unnoticed in the specific case studies last week. In general, the bigger boxes in the boxplot indicate that Mark Knopfler employs a bigger spectrum of timbral features than Dire Straits does, although only c05 seems to be consistently (and equally) prominent in the repertoires of both artists, which is the basis function for "scooped" lower-mid sounds in the spotify API. This naturally leads to lower levels for c06, which is a very mid-heavy MFCC with a slow attack.
+
+In conclusion, both Mark Knopfler and Dire Straits use a mid-scooped sound, but the sounds in the music by Dire Straits is more compressed, leading to higher mean volumes and slower decay compared to Mark Knopfler, while also being more bass-heavy.
+
+
+### 7. Conclusions and discussion {data-commentary-width=350}
 
 
