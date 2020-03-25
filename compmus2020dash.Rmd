@@ -87,7 +87,7 @@ direstraits3 <-
 combined3 <-
   knopfler3 %>% mutate(Artist = "Mark Knopfler") %>%
   bind_rows(
-    direstraits3 %>% mutate(Artist = "Dire Strats")) %>%
+    direstraits3 %>% mutate(Artist = "Dire Straits")) %>%
   mutate(Artist = factor(Artist)) %>%
   mutate(
         segments = 
@@ -157,101 +157,12 @@ predict_knn_reduced <- function(split)
 
 ```
 
-### 7. R has no problem distinguishing between Dire Straits and Mark Knopfler{data-commentary-width=450}
-
-```{r 7}
-
-
-artist_cv %>%
-  mutate(pred = map(splits, predict_knn)) %>% unnest(pred) %>%
-  conf_mat(truth = Artist, estimate = .pred_class) %>%
-  autoplot(type = 'mosaic')
-
-```
-
-***
-
-Clearly, R has no problem distinguishing between the two artists. When using an even larger number for k, it relatively has the most difficulty recognising music by Mark Knopfler. This could have something to do with the fact that Mark Knopfler's music seemed to be more diverse in previous experiments. This would mean that R recognises "The Dire Straits sound" and labels everything that isn't it as music by Mark Knopfler, mislabeling music by Mark Knopfler that conforms to this specific sound.
-
-I have used k = 13 for this experiment, since this is the square root of the size of the corpus rounded off to an odd number, which is the standard for knn algorithms according to google. The algorithm seemed to have the best results with k = 20, but this seemed to be quite extreme and that could hide some trends when looked into further.
-
-
-
-```{r 7x}
-
-artist_cv %>% 
-    mutate(pred = map(splits, predict_knn)) %>% unnest(pred) %>% 
-    metric_set(accuracy, kap, j_index)(truth = Artist, estimate = .pred_class)
-
-```
-
-### 8. R recognises Dire Straits because of its instrumentalness, loudness, energy, valence, acousticness and duration{data-commentary-width=450}
-
-```{r 8}
-
-artist_class %>% 
-    fit(forest, Artist ~ ., data = .) %>% 
-    pluck('fit') %>% 
-    randomForest::varImpPlot()
-
-```
-
-
-***
-
-Wow. I did not expect that. 
-
-Although acousticness does bear some weight in the desicion, the loudness seems to be much more important for R. Although the real differentiator seems to be instrumentalness, a parameter which thusfar has largely remained unnoticed. This could actually very well attribute to the lesser success of Mark Knopfler as a solo musician, since instrumental music tends to be less popular, especially if it's non-electronic. However, these parameters do not tend to harvest better results in a knn model, although they are still relatively accurate:
-
-```{r 8x}
-
-artist_cv %>% 
-    mutate(pred = map(splits, predict_knn_reduced)) %>% unnest(pred) %>% 
-    metric_set(accuracy, kap, j_index)(truth = Artist, estimate = .pred_class)
-
-```
-
-The most obvious conclusion that can be drawn from this is that the two artists are in fact *very* different, which is why R has no problem distinguishing between the two on the basis of whatever parameters we give it. In my conclusion I will plot the parameters that R has deemed most relevant (instrumentalness, energy and duration) to determine just how they are different for both artists. I have omitted loudness since that parameter is relative to acousticness (see page 2).
-
-### 9. Conclusions and discussion {data-commentary-width=350}
-
-```{r conclusion}
-
-conclusion <- ggplot(combined3, 
-                     aes(
-                       x = duration, 
-                       y = instrumentalness, 
-                       size = energy,
-                       col = Artist, label = track.name)) +
-  geom_point(alpha = 0.8)+
-  theme_classic() +
-  labs(color = "Artist", title = "Clearest difference between Mark Knopfler and Dire Straits according to R", size = "Energy", x = "Duration", y = "Instrumentalness")
-
-ggplotly(conclusion)
-
-```
-
-***
-
-*What are the fundamental differences between Mark Knopfler's music with Dire Straits and as a solo musician?*
-
-The first conclusion I was able to draw was that Mark Knopfler makes more timbrally diverse music for his solo career. This diversity has an effect on loudness, since certain timbres have the tendency to decay quickly (MFCC c04) which result in a lower loudness rating.
-
-However, R has made some other discoveries that I didn't pick up on when exploring the data:
-
-1. Mark Knopfler tends to write shorter songs for his solo project. An obvious outlier in this corpus is *Telegraph Road* which is approximately 15 minutes long.
-
-2. Mark Knopfler has often refrained from singing since departing from Dire Straits. Long guitar solo's and short verses have boosted the instrumentalness rating for Mark Knopfler's solo music. Since songs with prominent vocals tend to be more popular, this might be one of the reasons Mark Knopfler has had less success as a solo artist.
-
-3. Dire Straits generally had quite energetic songs (depicted in the size of the dots in this plot). Although not as striking as the instrumentalness ratings, these statistics have diwndled for Mark Knopfler since going solo. This once again might have contributed to the lesser succes of Mark Knopfler's solo career.
-
-There are of course extramusical factors aplenty that might have contributed to the lesser success of Mark Knopfler as a musician. For instance, there has been significantly less promotion for his solo music. Of course, promoting an older and mostly bald man playing Country- and Blues-inspired music in a culture that is moving towards R&B would always have posed a problem. Perhaps Mark Knopfler was just a child of his time.
 
 ### 1. Introduction: Why is Dire Straits so much more succesful than Mark Knopfler?
 
-Although Mark Knopfler has been at the helm for both Dire Straits and his own solo music as songwriter and main producer, Dire Straits has been much more successful than his own music. This leads me to believe that there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
+Although Mark Knopfler has been at the helm of both Dire Straits and his own solo music as songwriter and main producer, Dire Straits has been much more successful than his own music. This leads me to believe that there are some key differences between the music of Dire Straits and the music of Mark Knopfler. I will look at musical and production differences in order to conclude which of these is the most different. This will give insight in why Mark Knopfler's solo project never got the success that ultimately ended Dire Straits.
 
-The corpus I'm using is, quite obviously, the entire discographies by both artists, aquired by the get_artist_audio_features command from spotifyr. The question I intend to answer is: what are the fundamental differences between Mark Knopfler's music with Dire Straits and as a solo musician? 
+The corpus I'm using is, quite obviously, the entire discographies by both artists, acquired by the get_artist_audio_features command from SpotifyR. The question I intend to answer is: what are the fundamental differences between Mark Knopfler's music with Dire Straits and as a solo musician? 
 
 ### 2. The Spotify API skewes some data.{data-commentary-width=350}
 
@@ -300,9 +211,9 @@ investigations %>%
 
 ***
 
-Notable for the song *Private Investigations*, aside from its low loudness, is the fact that over the course of nearly 7 minutes, a very consistent drone on the note E is present. On certain points (like around the 2:15 mark) this E is the only note present in the song, which is clearly visible in the chromagram. Apart from the drone on E, the clearly distinguishable occurance of almost every other note is very notable. The harmonic development of the song crosses chords like Gdim7, A/C# and B7b9, despite being written in Em. This stands in stark contrast with the most of the other repertoire of both artists and pop music from that time (the 80s) in general. In this sense *Private Investigations* can be seen as a notable outlier in the repertoire of Dire Straits.
+Notable for the song *Private Investigations*, aside from its low loudness, is the fact that over the course of nearly 7 minutes, a very consistent drone on the note E is present. On certain points (like around the 2:15 mark) this E is the only note present in the song, which is clearly visible in the chromagram. Apart from the drone on E, the clearly distinguishable occurence of almost every other note is very notable. The harmonic development of the song crosses chords like Gdim7, A/C# and B7b9, despite being written in Em. This stands in stark contrast with most of the other repertoire of both artists and pop music from that time (the 80s) in general. In this sense *Private Investigations* is a notable outlier in the repertoire of Dire Straits.
 
-### 4. Mark Knopfler makes more timbrally diverse music for his solo project.{data-commentary-width=300}
+### 4. Mark Knopfler makes more timbrally diverse music for his solo project.{data-commentary-width=380}
 
 ```{r 4}
 
@@ -351,7 +262,7 @@ Looking at *Sultans of Swing*, it is interesting that there is a lot of activity
 Looking at MFCC c01, *What it Is* displays more dynamic diversity than *Sultans of Swing*, although it is the louder song overall. This is in line with the trends I've discovered in the previous weeks. 
 
 
-### 5. Dire Straits makes more compressed, bass-heavy music.{data-commentary-width=350}
+### 5. Dire Straits makes more compressed, bass-heavy music.{data-commentary-width=450}
 
 ```{r 5}
 
@@ -386,9 +297,9 @@ ggplotly(timbreplot) %>%
 
 When looking at the means and standard deviations of timbre, we can clearly see that the difference in the use of MFCC c02 (lower frequencies) we saw between *Sultans of Swing* and *What it is* is typical for the two artists. Apart from that, there seems to be a somewhat less significant difference in the levels for c04 (quickly decaying attack) which went by largely unnoticed in the specific case studies last week. In general, the bigger boxes in the boxplot indicate that Mark Knopfler employs a bigger spectrum of timbral features than Dire Straits does, although only c05 seems to be consistently (and equally) prominent in the repertoires of both artists, which is the basis function for "scooped" lower-mid sounds in the spotify API. This naturally leads to lower levels for c06, which is a very mid-heavy MFCC with a slow attack.
 
-In conclusion, both Mark Knopfler and Dire Straits use a mid-scooped sound, but the sounds in the music by Dire Straits is more compressed, leading to higher mean volumes and slower decay compared to Mark Knopfler, while also being more bass-heavy.
+In conclusion, both Mark Knopfler and Dire Straits use a mid-scooped sound, but the sounds in the music by Dire Straits is more compressed, leading to higher mean volumes and slower decay compared to Mark Knopfler, while also being more bass heavy.
 
-```{r, out.width = "300px"}
+```{r, out.width = "420px"}
 knitr::include_graphics("Timbre_basis_functions.png")
 ```
 
@@ -409,9 +320,94 @@ neworleans %>%
 
 ***
 
-One of the last projects drummer Jeff Porcaro (Toto, Steely Dan, Michael Jackson and many others) ever did was the album *On Every Street*, coincidentally also the last album by Dire Straits. The drumming style of Jeff Porcaro can be discribed as very laid back and large-sounding, which can largely be contributed to the fact that he tended to play the backbeat (counts 2 and 4) relatively late compared to the "grid". The result of this can be seen in this graph of *Planet of New Orleans*. After a rubato introduction, the groove sets in and the tempo changes in "waves", possibly due to the late timing of the backbeats especially after 330 seconds. 
+One of the last projects drummer Jeff Porcaro (Toto, Steely Dan, Michael Jackson and many others) ever did was the album *On Every Street*, coincidentally also the last album by Dire Straits. The drumming style of Jeff Porcaro can be discribed as very laid back and large sounding, which can largely be contributed to the fact that he tended to play the backbeat (counts 2 and 4) relatively late compared to the "grid". The result of this can be seen in this graph of *Planet of New Orleans*. After a rubato introduction, the groove sets in and the tempo changes in "waves", possibly due to the late timing of the backbeats especially after 330 seconds. 
 
 In this respect, the album *On Every Street* is an outlier for both Dire Straits and Mark Knopfler. The drummers Mark Knopfler has worked with ever since tend to be more "on the grid", resulting in flatter tempograms. 
 
+### 7. Dire Straits and Mark Knopfler have very distinguishable sounds{data-commentary-width=400}
 
+```{r 7}
+
+
+artist_cv %>%
+  mutate(pred = map(splits, predict_knn)) %>% unnest(pred) %>%
+  conf_mat(truth = Artist, estimate = .pred_class) %>%
+  autoplot(type = 'mosaic')
+
+```
+
+***
+
+I have comprised a new corpus of 160 songs, 80 songs per artist, and executed a knn model to predict which song was performed by which artist, based on the 13 nearest neighbours. With an accuracy of 80%, the two artists clearly are easily distinguishable. When using an even larger number for k, the knn model has the most difficulty recognising music by Mark Knopfler. This could have something to do with the fact that Mark Knopfler's music seemed to be more diverse in previous experiments. This would mean that this knn model recognises "The Dire Straits sound" and labels everything that isn't it as music by Mark Knopfler, mislabeling music by Mark Knopfler that conforms to this specific sound.
+
+I have used k = 13 for this experiment, since this is the square root of the size of the corpus rounded off to an odd number. The algorithm seemed to have the best results with k = 20, but this seemed to be quite extreme and that could hide some trends when investigated further.
+
+
+
+```{r 7x}
+
+artist_cv %>% 
+    mutate(pred = map(splits, predict_knn)) %>% unnest(pred) %>% 
+    metric_set(accuracy, kap, j_index)(truth = Artist, estimate = .pred_class)
+
+```
+
+### 8. R recognises Dire Straits because of its instrumentalness, loudness, energy, valence, acousticness and duration{data-commentary-width=450}
+
+```{r 8}
+
+artist_class %>% 
+    fit(forest, Artist ~ ., data = .) %>% 
+    pluck('fit') %>% 
+    randomForest::varImpPlot(main = "Impurity decrease per parameter")
+
+```
+
+
+***
+
+I have made a random forest and plotted which parameters decreased the impurities in desicion trees the most and the results are rather unexpected. Although acousticness does bear some weight in the desicion, the loudness seems to be a much more accurate parameter, increasing precision with 7,5% (6 on a grouping of 80). Although the real differentiator seems to be instrumentalness, a parameter which thusfar has largely remained unnoticed. This could very well attribute to the lesser success of Mark Knopfler as a solo musician, since instrumental music tends to be less popular, especially if it's non-electronic. However, these parameters do not tend to harvest better results in a knn model based solely on them, although they are still relatively accurate:
+
+```{r 8x}
+
+artist_cv %>% 
+    mutate(pred = map(splits, predict_knn_reduced)) %>% unnest(pred) %>% 
+    metric_set(accuracy, kap, j_index)(truth = Artist, estimate = .pred_class)
+
+```
+
+The most obvious conclusion that can be drawn from this is that the two artists are in fact *very* different, which is why a knn model can distinguish between the two with relative ease based on whatever parameters we give it. In my conclusion I will plot the parameters that seemed most relevant (instrumentalness, energy and duration) to determine just how they are different for both artists. I have omitted loudness since that parameter is relative to acousticness (see page 2).
+
+### 9. Conclusions and discussion {data-commentary-width=500}
+
+```{r conclusion}
+
+ggplot(combined3, 
+                     aes(
+                       x = energy, 
+                       y = instrumentalness, 
+                       size = duration,
+                       alpha = c04,
+                       col = Artist, label = track.name)) +
+  geom_point()+
+  theme_classic() +
+  labs(color = "Artist", title = "Clearest difference between Mark Knopfler and Dire Straits", size = "Duration", x = "Energy", y = "Instrumentalness", alpha = "MFCC c04")
+
+```
+
+***
+
+*What are the fundamental differences between Mark Knopfler's music with Dire Straits and as a solo musician?*
+
+The first conclusion I was able to draw was that Mark Knopfler makes more timbrally diverse music for his solo career. This diversity influences loudness, since certain timbres have the tendency to decay quickly (MFCC c04) which result in a lower loudness rating.
+
+However, a random forest has unearthed some other important differences that I didn't pick up on when exploring the data:
+
+1. Mark Knopfler tends to write shorter songs for his solo project. An obvious outlier in this corpus is *Telegraph Road* which is approximately 15 minutes long.
+
+2. Mark Knopfler has often refrained from singing since departing from Dire Straits. Long guitar solo's and short verses have boosted the instrumentalness rating for Mark Knopfler's solo music. Since songs with prominent vocals tend to be more popular, this might be one of the reasons Mark Knopfler has had less success as a solo artist.
+
+3. Dire Straits generally had quite energetic songs. Although not as striking as the instrumentalness ratings, these statistics have dwindled for Mark Knopfler since going solo. This once again might have contributed to the lesser succes of Mark Knopfler's solo career.
+
+There are of course extramusical factors aplenty that might have contributed to the lesser success of Mark Knopfler as a musician. For instance, there has been significantly less promotion for his solo music. Of course, promoting an older and mostly bald man playing Country- and Blues-inspired music in a culture that is moving towards R&B would always have posed a problem. Perhaps Mark Knopfler was just a child of his time.
 
